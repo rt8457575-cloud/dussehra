@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Happy Dussehra – Ravan Dahan</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#ffd36b;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0;height:100%;overflow:hidden}
+body{background:linear-gradient(#070416 0%,#2a0f3d 45%,#8a2b3a 75%,#f08a3c 100%);font-family:'Tiro Devanagari Hindi',Georgia,serif;color:var(--gold)}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+#ui{position:fixed;inset:0;pointer-events:none;text-align:center}
+#title{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 16px;transition:opacity 1.6s,transform 1.6s}
+#title.off{opacity:0;transform:translateY(-40px) scale(.9)}
+h1{font:900 clamp(34px,9vw,96px)/1.1 'Cinzel Decorative',Georgia,serif;margin:0;background:linear-gradient(#fff3b0,#ffb52e 55%,#c8501a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 24px rgba(255,140,40,.75));animation:pop 1.8s cubic-bezier(.2,1.4,.3,1) both}
+.sub{font-size:clamp(20px,4.5vw,44px);margin-top:10px;text-shadow:0 0 18px #ff8a2a;animation:pop 1.8s .5s both}
+.tag{margin-top:8px;font:700 clamp(12px,2vw,18px) 'Cinzel Decorative',Georgia,serif;letter-spacing:.2em;opacity:.85;animation:pop 1.8s 1s both}
+@keyframes pop{from{opacity:0;transform:scale(.5) translateY(30px)}to{opacity:1;transform:none}}
+#cap{position:absolute;left:0;right:0;bottom:calc(5% + env(safe-area-inset-bottom,0px));padding:0 16px;font-size:clamp(16px,3vw,30px);text-shadow:0 2px 14px #000,0 0 20px #ff7a1a;transition:opacity .6s;opacity:0}
+#cap.on{opacity:1}
+#cap b{display:block;font:900 clamp(26px,6vw,64px)/1.15 'Cinzel Decorative',Georgia,serif;color:#ffd36b}
+#re{pointer-events:auto;margin-top:14px;padding:10px 26px;font:700 16px 'Cinzel Decorative',Georgia,serif;color:#2a0f00;background:linear-gradient(#ffe38a,#ff9d2e);border:0;border-radius:30px;cursor:pointer;box-shadow:0 0 24px #ff8a2a;display:inline-block}
+</style></head><body>
+<div id="ui"><div id="title"><h1>Happy Dussehra</h1><div class="sub">शुभ विजयादशमी</div><div class="tag">VICTORY OF GOOD OVER EVIL</div></div>
+<div id="cap"></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const V3=THREE.Vector3,cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)),sm=x=>x*x*(3-2*x),rnd=Math.random,lerp=(a,b,t)=>a+(b-a)*t;
+const R=new THREE.WebGLRenderer({antialias:true,alpha:true});R.setPixelRatio(Math.min(devicePixelRatio,2));
+R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;R.outputEncoding=THREE.sRGBEncoding;R.toneMapping=THREE.ACESFilmicToneMapping;
+document.body.prepend(R.domElement);
+const S=new THREE.Scene();S.fog=new THREE.FogExp2(0x2a0f3d,0.008);
+const cam=new THREE.PerspectiveCamera(48,1,.1,400);let camZ=20;
+function fit(){const w=innerWidth,h=innerHeight;R.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix();camZ=Math.max(19,15/(Math.tan(24*Math.PI/180)*cam.aspect))}
+addEventListener('resize',fit);fit();
+// textures
+const tex=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d'),g=x.createRadialGradient(32,32,0,32,32,32);g.addColorStop(0,'#fff');g.addColorStop(.3,'rgba(255,255,255,.55)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,64,64);return new THREE.CanvasTexture(c)})();
+// lights
+S.add(new THREE.HemisphereLight(0x8a7ad8,0x3a2218,.75));
+const moonL=new THREE.DirectionalLight(0x9db4ff,.8);moonL.position.set(-10,22,14);moonL.castShadow=true;moonL.shadow.mapSize.set(1024,1024);Object.assign(moonL.shadow.camera,{left:-25,right:25,top:20,bottom:-5,far:80});S.add(moonL);
+const key=new THREE.PointLight(0xffb070,1.3,45,1.6);key.position.set(4,9,13);S.add(key);
+const fireL=new THREE.PointLight(0xff6a1a,0,45,1.6);fireL.position.set(8,6,4);S.add(fireL);
+const flashL=new THREE.PointLight(0xffe0a0,0,40,1.5);flashL.position.set(6.7,6.3,2);S.add(flashL);
+const arrL=new THREE.PointLight(0xff7a20,0,14,1.8);S.add(arrL);
+// world
+const gnd=new THREE.Mesh(new THREE.CircleGeometry(90,64),new THREE.MeshStandardMaterial({color:0x34241a,roughness:1}));gnd.rotation.x=-Math.PI/2;gnd.receiveShadow=true;S.add(gnd);
+for(let i=0;i<6;i++){const h=new THREE.Mesh(new THREE.ConeGeometry(14+rnd()*10,9+rnd()*8,7),new THREE.MeshStandardMaterial({color:0x160a26,roughness:1}));h.position.set(-60+i*24,3,-50-rnd()*10);S.add(h)}
+const moon=new THREE.Mesh(new THREE.SphereGeometry(4,24,16),new THREE.MeshBasicMaterial({color:0xfff2d0,fog:false}));moon.position.set(-34,34,-70);S.add(moon);
+const mg=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,color:0xffe9b0,blending:THREE.AdditiveBlending,fog:false,depthWrite:false,opacity:.6}));mg.scale.set(30,30,1);mg.position.copy(moon.position);S.add(mg);
+{const n=600,p=new Float32Array(n*3);for(let i=0;i<n;i++){const a=rnd()*6.28,e=.15+rnd()*1.2,r=140;p[i*3]=Math.cos(a)*Math.cos(e)*r;p[i*3+1]=Math.sin(e)*r*.7+10;p[i*3+2]=-Math.abs(Math.sin(a)*Math.cos(e)*r)-20}
+const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(p,3));S.add(new THREE.Points(g,new THREE.PointsMaterial({color:0xffffff,size:1.6,sizeAttenuation:false,fog:false,transparent:true,opacity:.8})))}
+const diyas=[];for(let i=0;i<18;i++){const x=-16+i*1.9,z=7+(i%2)*.6;
+ const b=new THREE.Mesh(new THREE.CylinderGeometry(.2,.12,.12,12),new THREE.MeshStandardMaterial({color:0x8a4b22}));b.position.set(x,.06,z);S.add(b);
+ const f=new THREE.Mesh(new THREE.SphereGeometry(.1,8,8),new THREE.MeshBasicMaterial({color:0xffc040}));f.position.set(x,.25,z);S.add(f);
+ const gl=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,color:0xff9a30,blending:THREE.AdditiveBlending,depthWrite:false,opacity:.85}));gl.scale.set(1.3,1.3,1);gl.position.set(x,.3,z);S.add(gl);diyas.push(f,gl)}
+// particles
+function pool(N,size){const P=new Float32Array(N*3).fill(-999),C=new Float32Array(N*3),V=new Float32Array(N*3),L=new Float32Array(N),M=new Float32Array(N),G=new Float32Array(N),B=new Float32Array(N*3);let k=0;
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('color',new THREE.BufferAttribute(C,3));
+ const o=new THREE.Points(g,new THREE.PointsMaterial({size,map:tex,vertexColors:true,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}));o.frustumCulled=false;S.add(o);
+ return{e(x,y,z,vx,vy,vz,l,c,gr=0){const i=k++%N,j=i*3;P[j]=x;P[j+1]=y;P[j+2]=z;V[j]=vx;V[j+1]=vy;V[j+2]=vz;L[i]=M[i]=l;G[i]=gr;B[j]=c[0];B[j+1]=c[1];B[j+2]=c[2]},
+ u(dt){for(let i=0;i<N;i++){if(L[i]<=0)continue;const j=i*3;L[i]-=dt;if(L[i]<=0){P[j+1]=-999;C[j]=C[j+1]=C[j+2]=0;continue}P[j]+=V[j]*dt;P[j+1]+=V[j+1]*dt;P[j+2]+=V[j+2]*dt;V[j+1]+=G[i]*dt;const f=L[i]/M[i];C[j]=B[j]*f;C[j+1]=B[j+1]*f;C[j+2]=B[j+2]*f}g.attributes.position.needsUpdate=true;g.attributes.color.needsUpdate=true},
+ clear(){L.fill(0);P.fill(-999);C.fill(0)}}}
+const fire=pool(2600,1.5),spark=pool(4500,.5);
+const FC=[[1,.45,.1],[1,.75,.25],[.9,.2,.05],[1,.9,.5]],FW=[[1,.2,.3],[.3,1,.4],[.3,.6,1],[1,.85,.2],[1,.4,1],[1,1,1]],rc=a=>a[rnd()*a.length|0];
+function burst(x,y,z,n,sp,life,col){for(let i=0;i<n;i++){const u=rnd()*2-1,a=rnd()*6.283,s=Math.sqrt(1-u*u),v=sp*(.5+rnd()*.5);spark.e(x,y,z,s*Math.cos(a)*v,u*v,s*Math.sin(a)*v,life*(.7+rnd()*.6),col||rc(FW),-4)}}
+// materials
+const BM=[],BLK=new THREE.Color(0x0c0705);
+function bm(c,m=.2,r=.6){const x=new THREE.MeshStandardMaterial({color:c,metalness:m,roughness:r});BM.push({m:x,c:new THREE.Color(c)});return x}
+const mk=(g,m,x,y,z,p)=>{const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.castShadow=true;p.add(o);return o};
+// ===== RAVAN STATUE =====
+const rav=new THREE.Group();rav.position.set(8,0,0);S.add(rav);const body=new THREE.Group();rav.add(body);
+const gold=bm(0xd9a521,.35,.35),red=bm(0xa3151c,.1,.7),skin=bm(0xb5532f,.1,.6),dark=bm(0x140808,.1,.8),stone=bm(0x6a5648,.05,.9),steel=bm(0xcfd3d8,.5,.25),white=bm(0xfff4e0,0,.4),crim=bm(0xd01515,.1,.5);
+const A=(g,m,x,y,z,p=body)=>mk(g,m,x,y,z,p);
+A(new THREE.CylinderGeometry(4.3,4.7,.5,32),stone,0,.25,0);A(new THREE.CylinderGeometry(3.5,3.9,.5,32),stone,0,.75,0);
+A(new THREE.CylinderGeometry(1.9,2.7,3.2,32),red,0,2.85,0);
+A(new THREE.TorusGeometry(2.45,.12,8,40),gold,0,1.5,0).rotation.x=Math.PI/2;
+A(new THREE.CylinderGeometry(1.78,1.92,.55,32),gold,0,4.6,0);
+A(new THREE.CylinderGeometry(1.8,1.45,3,32),skin,0,6.3,0);
+A(new THREE.CylinderGeometry(1.86,1.62,1.3,32),gold,0,6.75,0);
+A(new THREE.TorusGeometry(1.4,.12,8,32),crim,0,7.7,0).rotation.x=Math.PI/2;
+A(new THREE.CylinderGeometry(.9,1.1,.9,20),skin,0,8.1,0);
+A(new THREE.CircleGeometry(4.4,48),gold,0,10,-1.7).material.side=THREE.DoubleSide;
+A(new THREE.TorusGeometry(4.4,.18,8,48),crim,0,10,-1.65);
+for(const s of[-1,1]){A(new THREE.SphereGeometry(.7,16,12),gold,s*1.9,7.5,0);
+ [.3,.75,1.2,1.65,2.1].forEach((th,i)=>{const a=new THREE.Group();a.position.set(s*1.9,7.4,0);a.rotation.z=s*th;body.add(a);const L=3;
+  A(new THREE.CylinderGeometry(.25,.18,L,12),skin,0,-L/2,0,a);A(new THREE.TorusGeometry(.26,.07,6,12),gold,0,-1,0,a).rotation.x=Math.PI/2;A(new THREE.SphereGeometry(.3,12,10),skin,0,-L,0,a);
+  if(i==2||i==4){A(new THREE.BoxGeometry(.16,3,.06),steel,0,-L-1.5,0,a);A(new THREE.BoxGeometry(.8,.14,.14),gold,0,-L-.1,0,a)}})}
+function head(r){const g=new THREE.Group(),f=mk(new THREE.SphereGeometry(r,24,18),skin,0,0,0,g);f.scale.set(1,1.1,.95);
+ mk(new THREE.CylinderGeometry(r*.85,r*.97,r*.35,20),gold,0,r*.78,0,g);mk(new THREE.ConeGeometry(r*.8,r*.9,20),gold,0,r*1.35,0,g);mk(new THREE.SphereGeometry(r*.14,10,8),crim,0,r*1.88,0,g);
+ for(const s of[-1,1]){mk(new THREE.SphereGeometry(r*.15,10,8),white,s*r*.36,r*.12,r*.84,g).scale.z=.5;mk(new THREE.SphereGeometry(r*.075,8,8),dark,s*r*.36,r*.12,r*.95,g);
+  mk(new THREE.BoxGeometry(r*.5,r*.09,r*.08),dark,s*r*.38,r*.38,r*.88,g).rotation.z=-s*.35;
+  const m=mk(new THREE.TorusGeometry(r*.3,r*.07,6,14,Math.PI),dark,s*r*.3,-r*.28,r*.86,g);m.rotation.z=Math.PI;
+  mk(new THREE.ConeGeometry(r*.06,r*.2,6),white,s*r*.14,-r*.45,r*.85,g).rotation.x=Math.PI;mk(new THREE.SphereGeometry(r*.12,8,8),gold,s*r*.98,-r*.1,0,g)}
+ mk(new THREE.ConeGeometry(r*.12,r*.4,8),skin,0,-r*.08,r*.95,g).rotation.x=Math.PI/2;mk(new THREE.BoxGeometry(r*.1,r*.35,r*.06),crim,0,r*.5,r*.93,g);return g}
+const H=[];
+[[0,8.9,.8],...[-2,-1,1,2].map(i=>[i,8.95-Math.abs(i)*.12,.7])].forEach(([i,y,r])=>H.push({g:head(r),p:new V3(i*1.5,y,-Math.abs(i)*.15),r,ry:i*.16}));
+[-2,-1,0,1,2].forEach(i=>H.push({g:head(.58),p:new V3(i*1.2,11.1-Math.abs(i)*.1,-.9),r:.58,ry:i*.14}));
+H.forEach((h,i)=>{h.v=new V3((rnd()-.5)*9,2+rnd()*5,1+rnd()*4);h.sp=new V3(rnd()*4-2,rnd()*4-2,rnd()*4-2);h.tc=21+i*.18;h.g.position.copy(h.p);rav.add(h.g)});
+// ===== RAM JI =====
+const ram=new THREE.Group();S.add(ram);
+const bl=new THREE.MeshStandardMaterial({color:0x3d6fe0,roughness:.5}),yel=new THREE.MeshStandardMaterial({color:0xf4c430,roughness:.6}),gl2=new THREE.MeshStandardMaterial({color:0xffc83a,metalness:.4,roughness:.3,emissive:0x331a00}),rd=new THREE.MeshStandardMaterial({color:0xc62828,roughness:.6}),hair=new THREE.MeshStandardMaterial({color:0x120a08}),wood=new THREE.MeshStandardMaterial({color:0x5a3418,roughness:.7}),wh=new THREE.MeshBasicMaterial({color:0xffffff}),bk=new THREE.MeshBasicMaterial({color:0x000000});
+const legs=[-1,1].map(s=>{const g=new THREE.Group();g.position.set(s*.26,1.75,0);ram.add(g);mk(new THREE.CylinderGeometry(.17,.13,1.75,12),bl,0,-.87,0,g);mk(new THREE.BoxGeometry(.3,.12,.5),gl2,0,-1.72,.1,g);return g});
+mk(new THREE.CylinderGeometry(.5,.74,1.5,24),yel,0,2.1,0,ram);mk(new THREE.CylinderGeometry(.52,.52,.14,20),gl2,0,2.82,0,ram);
+mk(new THREE.CylinderGeometry(.62,.5,1.3,24),bl,0,3.45,0,ram);mk(new THREE.BoxGeometry(.18,1.5,.08),rd,0,3.5,.55,ram).rotation.z=.5;
+mk(new THREE.TorusGeometry(.42,.05,8,20),gl2,0,4.05,.1,ram).rotation.x=Math.PI/2.2;
+mk(new THREE.SphereGeometry(.4,20,16),bl,0,4.55,0,ram).scale.set(1,1.08,1);
+mk(new THREE.SphereGeometry(.3,12,10),hair,0,4.9,-.12,ram);mk(new THREE.CylinderGeometry(.34,.4,.18,16),gl2,0,4.95,0,ram);mk(new THREE.ConeGeometry(.32,.6,16),gl2,0,5.3,0,ram);mk(new THREE.SphereGeometry(.07,8,8),rd,0,5.65,0,ram);
+for(const s of[-1,1]){mk(new THREE.SphereGeometry(.07,8,8),wh,s*.15,4.6,.36,ram).scale.z=.5;mk(new THREE.SphereGeometry(.035,8,8),bk,s*.15,4.6,.42,ram);mk(new THREE.SphereGeometry(.07,8,8),gl2,s*.4,4.4,0,ram)}
+mk(new THREE.BoxGeometry(.06,.14,.04),rd,0,4.8,.38,ram);
+mk(new THREE.CircleGeometry(.85,32),new THREE.MeshBasicMaterial({color:0xffd36b,transparent:true,opacity:.5,side:2}),0,4.7,-.4,ram);
+mk(new THREE.CylinderGeometry(.14,.14,1.3,10),wood,-.3,3.6,-.5,ram).rotation.z=.3;for(let i=0;i<3;i++)mk(new THREE.ConeGeometry(.05,.3,6),rd,-.55+i*.1,4.35,-.5,ram);
+const armG=new THREE.BoxGeometry(1,.2,.2);armG.translate(.5,0,0);
+const armL=mk(armG,bl,.65,3.85,.35,ram),armR=mk(armG,bl,-.65,3.85,.35,ram),handL=mk(new THREE.SphereGeometry(.15,10,8),bl,0,0,.35,ram),handR=mk(new THREE.SphereGeometry(.15,10,8),bl,0,0,.35,ram);
+const bow=new THREE.Group();ram.add(bow);const bt=new THREE.Mesh(new THREE.TorusGeometry(1.2,.06,8,40,Math.PI),gl2);bt.rotation.z=-Math.PI/2;bt.position.x=-1.2;bt.castShadow=true;bow.add(bt);
+mk(new THREE.CylinderGeometry(.09,.09,.45,10),rd,0,0,0,bow);
+const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.BufferAttribute(new Float32Array(9),3));const str=new THREE.Line(sg,new THREE.LineBasicMaterial({color:0xfff5d0}));bow.add(str);
+const arrow=new THREE.Group();S.add(arrow);
+{const s=mk(new THREE.CylinderGeometry(.035,.035,2.4,8),wood,1.2,0,0,arrow);s.rotation.z=Math.PI/2;
+ const t=mk(new THREE.ConeGeometry(.1,.4,10),steel,2.6,0,0,arrow);t.rotation.z=-Math.PI/2;
+ for(const z of[-1,1])mk(new THREE.BoxGeometry(.35,.02,.14),rd,.2,0,z*.06,arrow)}
+arrow.visible=false;
+// ===== TIMELINE =====
+const T0=4,T1=8.5,TL=10.3,T2=12,T3=13.1,TC=21,TF=24.2,E=new V3(4.3,6.3,.3),EL=.44;
+const capEl=document.getElementById('cap'),titleEl=document.getElementById('title');let capKey='';
+function cap(k,h){if(k===capKey)return;capKey=k;capEl.classList.remove('on');setTimeout(()=>{if(capKey===k){capEl.innerHTML=h;capEl.classList.toggle('on',!!h);const b=capEl.querySelector('#re');if(b)b.onclick=reset}},350)}
+let T=0,st={},shake=0,flash=0,acc=0,sacc=0,crk=0,fw=0,nock=new V3(-6,4,.35);
+const once=(k,tm,fn)=>{if(T>=tm&&!st[k]){st[k]=1;fn()}};
+function reset(){T=0;for(const k in st)delete st[k];fire.clear();spark.clear();capKey='';capEl.classList.remove('on');shake=flash=0;crk=fw=0}
+function setBurn(b){const k=cl(b*1.2),g=(b>0&&b<1)?Math.sin(Math.PI*Math.min(1,b*1.15))*(.55+.35*rnd()):0;for(const o of BM){o.m.color.copy(o.c).lerp(BLK,k*.93);o.m.emissive.setRGB(g,g*.35,g*.05)}}
+function pose(){
+ const wk=cl((T-T0)/(T1-T0)),amp=wk>0?.6*(1-cl((wk-.85)/.15)):0,ph=T*8;
+ ram.position.x=-17+11*(1-Math.pow(1-wk,1.6));ram.position.y=Math.abs(Math.sin(ph))*.12*amp/.6;
+ legs[0].rotation.x=Math.sin(ph)*amp;legs[1].rotation.x=-Math.sin(ph)*amp;
+ const aim=sm(cl((T-T1)/1)),pull=T<T2?sm(cl((T-9.5)/1.8)):1-cl((T-T2)/.1),e=EL*aim;
+ ram.rotation.y=.6*(1-aim);
+ const aL=-1.3*(1-aim)+e;armL.rotation.z=aL;armL.scale.x=1.5;const hx=.65+1.5*Math.cos(aL),hy=3.85+1.5*Math.sin(aL);handL.position.set(hx,hy,.35);
+ bow.position.set(hx,hy,.35);bow.rotation.z=e;
+ const nl=-1.2-pull,nx=hx+nl*Math.cos(e),ny=hy+nl*Math.sin(e);
+ const p=sg.attributes.position.array;p.set([-1.2,1.2,0,nl,0,0,-1.2,-1.2,0]);sg.attributes.position.needsUpdate=true;
+ const vx=nx+.65,vy=ny-3.85,aA=Math.atan2(vy,vx),lA=Math.hypot(vx,vy);
+ const aR=lerp(-1.8,aA,aim),lR=lerp(1.5,lA,aim);armR.rotation.z=aR;armR.scale.x=lR;handR.position.set(-.65+lR*Math.cos(aR),3.85+lR*Math.sin(aR),.35);
+ ram.updateMatrixWorld();
+ if(T<T2){arrow.visible=aim>.6;arrow.position.copy(ram.localToWorld(handR.position.clone()));arrow.rotation.z=e;nock.copy(arrow.position)}
+ else{const u=cl((T-T2)/1.1),s=nock;arrow.visible=T<T3+4;arrow.position.set(lerp(s.x,E.x,u),lerp(s.y,E.y,u)+Math.sin(Math.PI*u)*.8,lerp(s.z,E.z,u));arrow.rotation.z=Math.atan2(E.y-s.y+Math.PI*.8*Math.cos(Math.PI*u),E.x-s.x)}
+ // ravan
+ const bb=cl((T-T3)/8);setBurn(bb);
+ const kc=sm(cl((T-TC)/3));body.scale.set(1+.25*kc,1-.88*kc,1);rav.rotation.z=(T>T3&&T<T3+1.5?Math.sin(T*40)*.012*(1-(T-T3)/1.5):0)+.1*kc;
+ for(const h of H){if(T<h.tc){h.g.rotation.y=h.ry+Math.sin(T*.8+h.p.x)*.1;h.g.position.copy(h.p)}else{const t=T-h.tc,fl=.9+h.r,tl=(h.v.y+Math.sqrt(h.v.y*h.v.y+18*Math.max(0,h.p.y-fl)))/9,tt=Math.min(t,tl);
+  h.g.position.set(h.p.x+h.v.x*tt*.5,Math.max(fl,h.p.y+h.v.y*tt-4.5*tt*tt),h.p.z+h.v.z*tt*.5);h.g.rotation.set(h.sp.x*tt,h.ry+h.sp.y*tt,h.sp.z*tt)}}
+ return bb}
+function fx(dt,bb){
+ // ambient
+ sacc+=dt*14;while(sacc>=1){sacc--;spark.e(-18+rnd()*38,.3,rnd()*8,(rnd()-.5)*.6,1+rnd(),0,3,[1,.7,.2],0)}
+ once('t1',1.1,()=>burst(-8,11,-4,110,8,2.2));once('t2',2.2,()=>burst(10,12,-4,110,8,2.2));once('t3',3.2,()=>burst(1,13,-6,140,9,2.4));
+ // arrow flame
+ if(T>=TL&&arrow.visible&&T<T3){const th=arrow.rotation.z,tx=arrow.position.x+Math.cos(th)*2.7,ty=arrow.position.y+Math.sin(th)*2.7;
+  for(let i=0;i<5;i++)fire.e(tx,ty,.35,(rnd()-.5)*.6,rnd()*1.2,(rnd()-.5)*.4,.45,rc(FC));
+  if(T>=T2)for(let i=0;i<3;i++)spark.e(tx,ty,.35,(rnd()-.5)*2,(rnd()-.5)*2,(rnd()-.5),.7,[1,.6,.2],0);
+  arrL.position.set(tx,ty,1);arrL.intensity=2+rnd()}else arrL.intensity=0;
+ once('imp',T3,()=>{const x=6.7,y=6.3;for(let i=0;i<160;i++){const u=rnd()*2-1,a=rnd()*6.28,s=Math.sqrt(1-u*u),v=2+rnd()*7;fire.e(x,y,.3,s*Math.cos(a)*v,u*v,s*Math.sin(a)*v,.5+rnd()*.7,rc(FC))}burst(x,y,.3,260,9,1.4,[1,.8,.35]);flash=1;shake=1});
+ flash=Math.max(0,flash-dt*2.5);flashL.intensity=flash*10;shake=Math.max(0,shake-dt*.8);
+ const amt=T<T3?0:(T<TF?cl((T-T3)/1.5):cl(1-(T-TF)/4));
+ if(amt>0){acc+=amt*340*dt;const hh=2+bb*10*(T<TC?1:body.scale.y);
+  while(acc>=1){acc--;const y=.8+rnd()*hh,sp=2.6*(1-y/15)+.5;fire.e(8+(rnd()-.5)*2*sp,y,(rnd()-.5)*2.4,(rnd()-.5)*.8,1.5+rnd()*3,(rnd()-.5)*.8,.6+rnd()*.9,rc(FC))}
+  sacc+=0;const ns=amt*45*dt;if(rnd()<ns)spark.e(8+(rnd()-.5)*4,2+rnd()*hh,(rnd()-.5)*2,(rnd()-.5)*3,2+rnd()*4,(rnd()-.5)*3,1.2+rnd()*1.5,[1,.7,.3],-2)}
+ fireL.intensity=amt*(2.8+rnd()*1.2)+(amt>0?0:0);
+ if(T>T3+1&&T<TC){crk-=dt;if(crk<=0){crk=.18+rnd()*.25;burst(8+(rnd()-.5)*5,2+rnd()*hh0(),(rnd()-.5)*2,36,4.5,.9)}}
+ once('hd',TC,()=>{shake=.6;burst(8,6,0,200,8,1.6,[1,.6,.2])});
+ if(T>TF){fw-=dt;if(fw<=0){fw=.4+rnd()*.3;burst(-12+rnd()*26,8+rnd()*5,-4+rnd()*3,150,9,2.1)}}
+ diyas.forEach((d,i)=>{const s=.9+.25*Math.sin(T*11+i*1.7);d.scale.setScalar(d.isSprite?1.3*s:s)});
+ fire.u(dt);spark.u(dt)}
+const hh0=()=>8;
+function ui(){titleEl.classList.toggle('off',T>4.3);
+ if(T<4.3)cap('a','');else if(T<T1)cap('b','श्री राम धनुष-बाण लेकर पधारे…<br>Shri Ram arrives with Dhanush &amp; Teer');
+ else if(T<T2)cap('c','धर्म का बाण तैयार…<br>The arrow of Dharma is drawn');else if(T<T3)cap('d','<b>जय श्री राम!</b>');
+ else if(T<TF)cap('e','रावण दहन<br>Ravan Dahan – evil burns to ashes');
+ else cap('f','<b>Jai Shri Ram</b>Good has triumphed over evil.<br><button id="re">↻ Replay</button>')}
+let last=performance.now();
+function frame(n){const dt=Math.min(.05,(n-last)/1000);last=n;T+=dt;const bb=pose();fx(dt,bb);ui();
+ const z=camZ-4*(1-sm(cl(T/6)))+(T>T3?1.2*sm(cl((T-T3)/4)):0);
+ cam.position.set(1.5+Math.sin(T*.2)*1.2+(rnd()-.5)*shake*.5,5.2+(rnd()-.5)*shake*.5,z);cam.lookAt(1.5,5.6,0);
+ R.render(S,cam);requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+</script></body></html>
